@@ -69,6 +69,20 @@ class Board
     true
   end
 
+  def stalemate?(color)
+    every_pieces_moves = []
+    @grid.flatten.each do |square|
+      if square.color == color
+        square.moves
+        square.pos_moves.each do |move|
+          every_pieces_moves << move unless in_check?(square.pos, move)
+          return false unless in_check?(square.pos, move)
+        end
+      end
+    end
+    true
+  end
+
   def dup
     duped_board = Board.new(false)
     (0..7).each do |row|

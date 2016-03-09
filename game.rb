@@ -21,32 +21,35 @@ class Game
     puts "Welcome to Chess!"
     sleep(1)
 
-    until @board.checkmate?(@current_player.color)
+    until @board.checkmate?(@current_player.color) || @board.stalemate?(@current_player.color)
       @board.check?(@current_player.color)
-    begin
-      @display.render(@current_player)
       begin
-        start_pos = @current_player.take_turn
-        valid_piece?(start_pos)
+        @display.render(@current_player)
+        begin
+          start_pos = @current_player.take_turn
+          valid_piece?(start_pos)
+        rescue
+          puts "Pick your own piece!"
+          sleep(1)
+          retry
+        end
+        end_pos = @current_player.take_turn
+        @board.move(start_pos, end_pos)
       rescue
-        puts "Pick your own piece!"
+        puts "Not a valid move!"
         sleep(1)
         retry
       end
-      end_pos = @current_player.take_turn
-      @board.move(start_pos, end_pos)
-    rescue
-      puts "Not a valid move!"
-      sleep(1)
-      retry
+      switch_turns
     end
-    switch_turns
-
+    if @board.checkmate?(@current_player.color)
+      switch_turns
+      @display.render(@current_player)
+      puts "Congrats #{@current_player.color} player! You Win!"
     end
-    switch_turns
-    @display.render(@current_player)
-    puts "Congrats #{@current_player.color} player! You Win!"
-
+    if @board.stalemate?(@current_player.color)
+      puts "Stalemate!!!"
+    end
   end
 
   def switch_turns
