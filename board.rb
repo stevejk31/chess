@@ -184,7 +184,10 @@ class Board
   end
 
   def can_passant?(start_pos, end_pos)
-
+    pawn = self[start_pos]
+    passant = self[end_pos]
+    if pawn.class == pawn && passant == NilPiece
+    end
   end
 
   def move_passant(start_pos, end_pos)
