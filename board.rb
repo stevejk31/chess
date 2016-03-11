@@ -8,35 +8,44 @@ class Board
   end
 
   def move(start_pos, end_pos)
+    can_castle = can_castle?(start_pos, end_pos)
+    can_passant = can_passant?(start_pos, end_pos)
     raise "There is no piece to move" if self[start_pos].nil?
-    raise "That is not a valid move" unless valid_move?(start_pos, end_pos)
-    move!(start_pos, end_pos)
+    raise "That is not a valid move" unless valid_move?(start_pos, end_pos, can_castle, can_passant)
+    move!(start_pos, end_pos, can_castle, can_passant)
+    self[end_pos].moved_piece
   end
 
-  def move!(start_pos, end_pos)
+  def move!(start_pos, end_pos, can_castle = false, can_passant = false)
     self[end_pos], self[start_pos] = self[start_pos], self[end_pos]
     self[end_pos].pos = end_pos
-    kill(start_pos)
+    if can_castle
+      move_castle(start_pos, end_pos)
+    elsif can_passant
+      move_passant(start_pos, end_pos)
+    else
+      kill(start_pos)
+    end
   end
 
   def kill(pos)
     self[pos] = NilPiece.new if self[pos].class != NilPiece
   end
 
-  def valid_move?(start_pos, end_pos)
+  def valid_move?(start_pos, end_pos, can_castle = false, can_passant = false)
     piece = self[start_pos]
     piece.moves
-    if piece.pos_moves.include?(end_pos)
-      !in_check?(start_pos, end_pos)
+    if piece.pos_moves.include?(end_pos) || can_castle || can_passant
+      !in_check?(start_pos, end_pos, can_castle, can_passant)
     else
       false
     end
   end
 
-  def in_check?(start_pos, end_pos)
+  def in_check?(start_pos, end_pos, can_castle = false, can_passant = false)
     duped_board = self.dup
     current_piece = duped_board[start_pos]
-    duped_board.move!(start_pos, end_pos)
+    duped_board.move!(start_pos, end_pos, can_castle, can_passant)
     duped_board.check?(current_piece.color)
   end
 
@@ -114,7 +123,7 @@ class Board
 
     self[[0,1]] = Knight.new([0,1], :black, self)
     self[[0,6]] = Knight.new([0,6], :black, self)
-    self[[7,1]] = Knight.new([0,1], :white, self)
+    self[[7,1]] = Knight.new([7,1], :white, self)
     self[[7,6]] = Knight.new([7,6], :white, self)
 
     self[[0,2]] = Bishop.new([0,2], :black, self)
@@ -127,6 +136,58 @@ class Board
 
     self[[0,4]] = King.new([0,4], :black, self)
     self[[7,4]] = King.new([7,4], :white, self)
+
+  end
+
+  def can_castle?(start_pos, end_pos)
+    king = self[start_pos]
+    castle = self[end_pos]
+    if king.class == King && !king.moved? && castle.class == NilPiece &&
+      (start_pos[1]-end_pos[1]).abs == 2
+
+      if start_pos[1] < end_pos[1]
+        start_loc = start_pos[1] +1
+        end_loc = 7
+      else
+        start_loc = 1
+        end_loc = start_pos[1]
+      end
+
+      row = start_pos[0]
+      while start_loc < end_loc
+        if self[[row,start_loc]].class != NilPiece
+          return false
+        end
+        start_loc += 1
+      end
+      can_castle = true
+    else
+      can_castle = false
+    end
+    can_castle
+  end
+
+  def move_castle(start_pos, end_pos)
+    if start_pos[1] < end_pos[1]
+      # right side
+      rook_start = [start_pos[0], 7]
+      rook_end = [start_pos[0], end_pos[1]-1]
+      self[rook_end], self[rook_start] = self[rook_start], self[rook_end]
+      self[rook_end].pos = rook_end
+    else
+      # left side
+      rook_start = [start_pos[0], 0]
+      rook_end = [start_pos[0], end_pos[1]+1]
+      self[rook_end], self[rook_start] = self[rook_start], self[rook_end]
+      self[rook_end].pos = rook_end
+    end
+  end
+
+  def can_passant?(start_pos, end_pos)
+
+  end
+
+  def move_passant(start_pos, end_pos)
 
   end
 

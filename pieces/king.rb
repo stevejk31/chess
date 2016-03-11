@@ -12,6 +12,7 @@ class King < SteppingPiece
   end
 
   def moves
-    generate_moves(:king)
+    @pos_moves = generate_moves(:king)
+  
   end
 end

@@ -8,6 +8,7 @@ class Piece
     @board = board
     @color = color
     @pos_moves =[]
+    @moved = false
   end
 
   def to_s
@@ -16,6 +17,14 @@ class Piece
 
   def in_bounds?(pos)
     @board.in_bounds?(pos)
+  end
+
+  def moved_piece
+    @moved = true
+  end
+
+  def moved?
+    @moved
   end
 
   def dup(board)
