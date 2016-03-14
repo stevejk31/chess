@@ -14,9 +14,12 @@ class Display
   end
 
   def build_grid
+    output_board = [[" \\ ", " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "]]
     @board.grid.map.with_index do |row, i|
+      output_board.push(build_row(row, i).unshift(" #{8-i} "))
       build_row(row, i)
     end
+  output_board
   end
 
   def build_row(row, i)

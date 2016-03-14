@@ -1,14 +1,15 @@
 require "colorize"
 class Piece
-  attr_reader :board, :color
+  attr_reader :board, :color, :num_moves, :last_turn
   attr_accessor :pos_moves, :pos
 
   def initialize (pos, color, board)
     @pos = pos
     @board = board
     @color = color
-    @pos_moves =[]
-    @moved = false
+    @pos_moves = []
+    @num_moves = 0
+    @last_turn = 0
   end
 
   def to_s
@@ -19,12 +20,13 @@ class Piece
     @board.in_bounds?(pos)
   end
 
-  def moved_piece
-    @moved = true
+  def moved_piece(num_turns)
+    @num_moves += 1
+    @last_turn = num_turns
   end
 
   def moved?
-    @moved
+    @num_moves > 0
   end
 
   def dup(board)

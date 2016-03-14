@@ -4,6 +4,7 @@ class Board
   def initialize(pop = true)
     @grid = Array.new(8) {Array.new(8) {NilPiece.new}}
     @board_status = :normal
+    @turn = 0
     populate if pop
   end
 
@@ -11,9 +12,12 @@ class Board
     can_castle = can_castle?(start_pos, end_pos)
     can_passant = can_passant?(start_pos, end_pos)
     raise "There is no piece to move" if self[start_pos].nil?
-    raise "That is not a valid move" unless valid_move?(start_pos, end_pos, can_castle, can_passant)
+    unless valid_move?(start_pos, end_pos, can_castle, can_passant)
+      raise "That is not a valid move"
+    end
     move!(start_pos, end_pos, can_castle, can_passant)
-    self[end_pos].moved_piece
+    @turn += 1
+    self[end_pos].moved_piece(@turn)
   end
 
   def move!(start_pos, end_pos, can_castle = false, can_passant = false)
@@ -25,6 +29,9 @@ class Board
       move_passant(start_pos, end_pos)
     else
       kill(start_pos)
+      if can_pawn_promotion?(end_pos)
+        promote_pawn(end_pos)
+      end
     end
   end
 
@@ -186,12 +193,37 @@ class Board
   def can_passant?(start_pos, end_pos)
     pawn = self[start_pos]
     passant = self[end_pos]
-    if pawn.class == pawn && passant == NilPiece
+
+    if pawn.class == Pawn && passant.class == NilPiece &&
+      pawn.generate_passant_moves.include?(end_pos)
+
+      opp_pawn = self[[start_pos[0], end_pos[1]]]
+      if opp_pawn.class == Pawn && opp_pawn.color != pawn.color
+
+        if opp_pawn.can_be_passanted?
+          return opp_pawn.last_turn == @turn
+        end
+
+      end
+
     end
+    false
   end
 
   def move_passant(start_pos, end_pos)
+    kill([start_pos[0], end_pos[1]])
+  end
 
+  def can_pawn_promotion?(pos)
+    pawn = self[pos]
+    pawn.class == Pawn && (
+      (pawn.color == :black && pawn.pos[0] == 7) ||
+      (pawn.color == :white && pawn.pos[0] == 0)
+    )
+  end
+
+  def promote_pawn(pos)
+    self[pos] = Queen.new(pos, self[pos].color, self)
   end
 
   def [](pos)

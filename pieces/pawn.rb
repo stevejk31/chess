@@ -28,6 +28,15 @@ class Pawn < Piece
     pos_moves
   end
 
+  def generate_passant_moves
+    pos_moves =[]
+    DELTA_KILL[self.color].each do |el|
+      new_move = [el[0] + @pos[0], el[1] + @pos[1]]
+      pos_moves << new_move
+    end
+    pos_moves
+  end
+
   def generate_normal_moves
     pos_moves =[]
     if @pos[0] == INITIAL_POS[self.color]
@@ -42,6 +51,13 @@ class Pawn < Piece
       pos_moves << new_move if @board[new_move].class == NilPiece
     end
     pos_moves
+  end
+
+  def can_be_passanted?
+    @num_moves == 1 && (
+      (@color == :white && @pos[0] == 4) ||
+      (@color == :black && pos[0] == 3)
+    )
   end
 
   def moves

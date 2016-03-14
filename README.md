@@ -11,11 +11,8 @@ movement logic DRY.
 Download the repo. In the chess folder, run `ruby /lib/game.rb`
 
 ## Features
-- Validates full range of chess movement including castling
+- Validates full range of chess movement including castling & en passant & pawn promotion
 - Check, checkmate, and stalemate
 
 ## To-Do
-- Add castling and pawn promotion
-- Basic AI that uses breadth-first searches to choose moves
-- Fully transition to chess notation from coordinate notation
-- A printout of the full game's chess notation to allow real-world sharing
+- Save and load games
